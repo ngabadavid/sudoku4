@@ -22,7 +22,7 @@ namespace ConsoleApp1
             generate(startingGrid);
 
             // Save resolved grids in an Excel file
-            ExportArrayToExcel(grids, "../resolved.xlsx");
+            ExportArrayToExcel(grids, "/resolved.xlsx");
 
             Console.WriteLine("+++++++ REMOVE +++++++");
             for (int i = 0; i < grids.Count; i++)
@@ -36,7 +36,7 @@ namespace ConsoleApp1
             }
 
             // Save unresolved grids in an Excel file
-            ExportArrayToExcel(grids, "../unresolved.xlsx");
+            ExportArrayToExcel(grids, "/unresolved.xlsx");
         }
         public void generate(int[,] grid)
         {
