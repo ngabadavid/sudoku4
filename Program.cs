@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using OfficeOpenXml;
+using System.IO;
 
-namespace sudoku4
+namespace ConsoleApp1
 {
     class Generator
     {
@@ -19,16 +21,22 @@ namespace sudoku4
             Console.WriteLine("+++++++ GENERATE +++++++");
             generate(startingGrid);
 
+            // Save resolved grids in an Excel file
+            ExportArrayToExcel(grids, "../resolved.xlsx");
+
             Console.WriteLine("+++++++ REMOVE +++++++");
             for (int i = 0; i < grids.Count; i++)
             {
                 Console.WriteLine("==> GRID " + i + " : ");
                 Console.WriteLine("+++++++ BEFORE +++++++");
-                Print(grids[0]);
-                Remove(grids[0]);
+                Print(grids[i]);
+                Remove(grids[i]);
                 Console.WriteLine("+++++++ AFTER +++++++");
-                Print(grids[0]);
+                Print(grids[i]);
             }
+
+            // Save unresolved grids in an Excel file
+            ExportArrayToExcel(grids, "../unresolved.xlsx");
         }
         public void generate(int[,] grid)
         {
@@ -205,6 +213,36 @@ namespace sudoku4
                     grid[r, c] = backup;
                     attempts -= 1;
                 }
+            }
+        }
+
+        public void ExportArrayToExcel(List<int[,]> arrays, string filePath)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            // Create a new Excel package
+            using (ExcelPackage excelPackage = new ExcelPackage())
+            {
+                // Create a new worksheet
+                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+
+                // Write the array values to the worksheet
+                for (int x = 0; x < arrays.Count; x++)
+                {
+                    for (int i = 0; i < arrays[x].Length; i++)
+                    {
+                        for (int j = 0; j < arrays[x].Length; j++)
+                        {
+                            worksheet.Cells[i, j + (x * 5)].Value = arrays[x][i, j];
+                        }
+
+                    }
+                }
+
+
+                // Save the Excel package to a file
+                FileInfo excelFile = new FileInfo(filePath);
+                excelPackage.SaveAs(excelFile);
             }
         }
     }
