@@ -1,21 +1,48 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace sudoku4
 {
     class Generator
     {
         public int counter = 0;
-       
+        public int solution = 0;
+        public int[,] startingGrid = {
+                    { 0,0,0,0 },
+                    { 0,0,0,0 },
+                    { 0,0,0,0 },
+                    { 0,0,0,0 }
+                };
+        public List<int[,]> grids = new List<int[,]>();
         public Generator()
         {
+            Console.WriteLine("+++++++ GENERATE +++++++");
+            generate(startingGrid);
 
+            Console.WriteLine("+++++++ REMOVE +++++++");
+            for (int i = 0; i < grids.Count; i++)
+            {
+                Console.WriteLine("==> GRID " + i + " : ");
+                Console.WriteLine("+++++++ BEFORE +++++++");
+                Print(grids[0]);
+                Remove(grids[0]);
+                Console.WriteLine("+++++++ AFTER +++++++");
+                Print(grids[0]);
+            }
         }
         public void generate(int[,] grid)
         {
             if (CheckGrid(grid))
             {
                 counter++;
-                Print(grid);
+                int[,] copyGrid = new int[4, 4];
+                for (int i = 0; i < 16; i++)
+                {
+                    int rc = i / 4;
+                    int cc = i % 4;
+                    copyGrid[rc, cc] = grid[rc, cc];
+                }
+                grids.Add(copyGrid);
                 return;
             }
 
@@ -24,7 +51,7 @@ namespace sudoku4
                 int r = i / 4;
                 int c = i % 4;
 
-                if(grid[r,c] == 0)
+                if (grid[r, c] == 0)
                 {
                     for (int num = 1; num <= 4; num++)
                     {
@@ -34,12 +61,11 @@ namespace sudoku4
                             generate(grid);
                             grid[r, c] = 0;
                         }
-                        
+
                     }
                     return;
                 }
             }
-            //return true;
         }
 
         public bool CheckGrid(int[,] grid)
@@ -48,7 +74,7 @@ namespace sudoku4
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (grid[i,j] == 0)
+                    if (grid[i, j] == 0)
                     {
                         return false;
                     }
@@ -109,33 +135,84 @@ namespace sudoku4
 
         public void Print(int[,] grid)
         {
-            Console.WriteLine("Grid " + counter + " : =====================================");
+            Console.WriteLine("===================================");
             for (int r = 0; r < 4; r++)
             {
                 for (int c = 0; c < 4; c++)
                 {
                     Console.Write("|");
-                    Console.Write(grid[r,c]);
+                    Console.Write(grid[r, c]);
                     Console.Write("|");
                 }
                 Console.WriteLine("");
             }
         }
+        public void Solve(int[,] grid)
+        {
+            if (CheckGrid(grid))
+            {
+                this.solution += 1;
+                return;
+            }
+            for (int i = 0; i < 16; i++)
+            {
+                int r = i / 4;
+                int c = i % 4;
+                if (grid[r, c] == 0)
+                {
+                    for (int value = 1; value <= 4; value++)
+                    {
+                        if (!Used(value, r, c, grid))
+                        {
+                            grid[r, c] = value;
+                            Solve(grid);
+                            grid[r, c] = 0;
 
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+        public void Remove(int[,] grid)
+        {
+            Random random = new Random();
+            int attempts = 2;
+            while (attempts > 0)
+            {
+                int r = random.Next(0, 4);
+                int c = random.Next(0, 4);
+                while (grid[r, c] == 0)
+                {
+                    r = random.Next(0, 4);
+                    c = random.Next(0, 4);
+                }
+                int backup = grid[r, c];
+                grid[r, c] = 0;
+
+                int[,] copyGrid = new int[4, 4];
+                for (int i = 0; i < 16; i++)
+                {
+                    int rc = i / 4;
+                    int cc = i % 4;
+                    copyGrid[rc, cc] = grid[rc, cc];
+                }
+
+                solution = 0;
+                this.Solve(copyGrid);
+                if (solution != 1)
+                {
+                    grid[r, c] = backup;
+                    attempts -= 1;
+                }
+            }
+        }
     }
     class Program
     {
-        
         static void Main(string[] args)
         {
-            int[,] grid = {
-            { 0,0,0,0 },
-            { 0,0,0,0 },
-            { 0,0,0,0 },
-            { 0,0,0,0 }
-        };
-            Generator g = new Generator();
-            g.generate(grid);
+            new Generator();
         }
     }
 }
